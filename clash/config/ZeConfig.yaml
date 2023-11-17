@@ -17,10 +17,42 @@ bind-address: "*"    # 地址绑定
 mode: rule           # 规则模式
 log-level: info      # 日志级别
 ipv6: true          # IPV6开关
+unified-delay: false
 tcp-concurrent: true
 find-process-mode: strict
 global-client-fingerprint: chrome
 external-controller: 127.0.0.1:9090
+experimental:
+  ignore-resolve-fail: true
+
+geodata-mode: true
+geox-url:
+  geoip: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+tun:
+  enable: true
+  stack: system
+  dns-hijack:
+    - "any:53"
+  auto-route: true
+  auto-detect-interface: true
+
+sniffer:
+  enable: true
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    QUIC:
+      ports: [443]
 
 dns:
   enable: true       # 不使用系统 DNS
@@ -60,7 +92,7 @@ dns:
 
 # 策略组引用
 # proxy 相关
-pr:   &a3 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others, ✈️ 专线, DIRECT] }
+pr:   &a3 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others, ProxyGroup2, DIRECT] }
 #这里是订阅更新和延迟测试相关的
 p:    &a1 {type: http,     interval: 86400,  health-check: {enable: true, url: https://www.gstatic.com/generate_204, interval: 1800} }
 # 自动选择相关
@@ -73,17 +105,19 @@ c:    &a6 {type: http,     behavior: classical, interval: 86400}
 d:    &a5 {type: http,     behavior: domain,    interval: 86400}
 
 i:    &a7 {type: http,     behavior: ipcidr,    interval: 86400}
+# proxy 相关 +🌏 全球加速
+h:    &a8 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others,ProxyGroup2, 🌏 全球加速, DIRECT] }
 
 proxy-providers:
   Subscribe:
     <<: *a1
-    url: https://sub.tagsub.net/api/v1/client/subscribe?token=d04fcbf255c7f7be1684fc22cff761ef
+    url: https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
     path: ./proxy_providers/tmp.yaml
     # URL后面填写格式1: 直接填写你的机场Clash订阅[单一订阅][推荐此种方式，避免订阅泄露]
     # URL后面填写格式2：https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
   Subscribe2:
     <<: *a1
-    url: https://sub.tagsub.net/api/v1/client/subscribe?token=d04fcbf255c7f7be1684fc22cff761ef
+    url: https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
     path: ./proxy_providers/tmp2.yaml
     # URL后面填写格式1: 直接填写你的机场Clash订阅[单一订阅][推荐此种方式，避免订阅泄露]
     # URL后面填写格式2：https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false    
@@ -109,54 +143,44 @@ proxy-groups:
 #分流分组
   - {name: 🚀 手动切换, <<: *a2}
   - {name: 🌏 全球加速, <<: *a3}
-  - {name: 🍎 苹果服务, <<: *a3}
+  - {name: 🍎 苹果服务, <<: *a8}
   - {name: 🤖 OpenAi,   type: select, proxies: [🇺🇲 美国节点,🌏 全球加速]}
-  - {name: 🌌 谷歌服务, <<: *a3}
-  - {name: 🎮 游戏平台, <<: *a3}
+  - {name: 🌌 谷歌服务, <<: *a8}
+  - {name: 🎮 游戏平台, <<: *a8}
   - {name: 🆎 AdBlock, type: select, proxies: [REJECT,🌏 全球加速,DIRECT]}
-  - {name: 🐟 兜底分流, <<: *a3}
+  - {name: 🐟 兜底分流, <<: *a8}
   
 #节点分组
 # a4更改为a2，即为手动选择
   - {name: ♻️ 自动选择, <<: *a4}
-  - {name: 🇭🇰 香港节点, <<: *a4, filter: "港|HK|(?i)Hong"           }             # a4更改为a2，即为手动选择
-  - {name: 🇯🇵 日本节点, <<:  *a4, filter: "日|东京|JP|(?i)Japan"     }             # a4更改为a2，即为手动选择     
-  - {name: 🇨🇳 台湾节点, <<: *a4, filter: "台|湾|TW|(?i)Taiwan"      }              # a4更改为a2，即为手动选择
+  - {name: 🇭🇰 香港节点, <<: *a4, filter: "港|HK"           }             # a4更改为a2，即为手动选择
+  - {name: 🇯🇵 日本节点, <<:  *a4, filter: "日|东京|JP"     }             # a4更改为a2，即为手动选择     
+  - {name: 🇨🇳 台湾节点, <<: *a4, filter: "台|湾|TW"      }              # a4更改为a2，即为手动选择
   - {name: 🇺🇲 美国节点, <<: *a4, filter: "美|US|(?i)States|American"}             # a4更改为a2，即为手动选择
-  - {name: 🇸🇬 坡县节点, <<: *a4, filter: "新|坡|SG|(?i)Singapore"    }
+  - {name: 🇸🇬 坡县节点, <<: *a4, filter: "新|坡|SG"    }
   - {name: ✈️ Others, <<: *a2, filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新|sg|singapore|美|us|unitedstates)).*" }
 
+# 单独使用proxy2
+  - name: ProxyGroup2
+    type: url-test
+    disable-udp: false
+    url: "https://www.gstatic.com/generate_204"
+    filter: "🇭🇰|JP"
+    use:
+      - Subscribe2
+
 #特殊分组
-  - { name: ✈️ 专线, <<: *a2, filter: "weiyi|iplc|hy2" }
+  # - { name: ✈️ 专线, <<: *a2, filter: "weiyi|iplc|hy2" }
 
 
-# TODO:添加自定义内容
 # 分流规则 
 # rule-providers:
-
-#   Direct:      {<<: *a5, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Direct/Direct.yaml,                      path: ./ruleset/Direct.yaml       }
-#   Lan:         {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Lan/Lan.yaml,                            path: ./ruleset/Lan.yaml          }
-#   Download:    {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Download/Download.yaml,                  path: ./ruleset/Download.yaml     }
-#   Ad:          {<<: *a5, url: https://anti-ad.net/clash.yaml,                                                                                     path: ./ruleset/anti-ad-clash.yaml}
-#   OpenAi:      {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml,                      path: ./ruleset/OpenAi.yaml       }
-#   BiliBili:    {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/BiliBili/BiliBili.yaml,                  path: ./ruleset/BiliBili.yaml     }
-#   GlobalMedia: {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/GlobalMedia/GlobalMedia_Classical.yaml,  path: ./ruleset/GlobalMedia.yaml  }
-#   Apple:       {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Apple/Apple_Classical.yaml,              path: ./ruleset/Apple.yaml        }
-#   Github:      {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/GitHub/GitHub.yaml,                      path: ./ruleset/Github.yaml       }
-#   Microsoft:   {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Microsoft/Microsoft.yaml,                path: ./ruleset/Microsoft.yaml    }
-#   Google:      {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Google/Google.yaml,                      path: ./ruleset/Google.yaml       }
-#   Telegram:    {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Telegram/Telegram.yaml,                  path: ./ruleset/Telegram.yaml     }
-#   Twitter:     {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Twitter/Twitter.yaml,                    path: ./ruleset/Twitter.yaml      }
-#   Game:        {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Game/Game.yaml,                          path: ./ruleset/Game.yaml         }
-#   ChinaIP:     {<<: *a7, url: https://cdn.jsdelivr.net/gh/soffchen/GeoIP2-CN@release/clash-rule-provider.yml,                                     path: ./ruleset/ChinaIP.yaml      }
-#   ProxyLite:   {<<: *a6, url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ProxyLite/ProxyLite.yaml,                path: ./ruleset/ProxyLite.yaml    }
-  
 
 rule-providers:
   CustomAll:
     type: http
     behavior: classical
-    url: "https://raw.githubusercontent.com/xuezihe/VPSServer/main/clash/rules/CustomAll.yaml"
+    url: "https://cdn.jsdelivr.net/gh/xuezihe/VPSServer@main/clash/rules/CustomAll.yaml"
     path: ./ruleset/CustomAll.yaml 
     interval: 86400
   
@@ -265,32 +289,6 @@ rule-providers:
     path: ./ruleset/applications.yaml
     interval: 86400
   
-
-
-
-
-#  # 分流Policy 
-# rules:
-#   - RULE-SET,Direct,DIRECT
-#   - RULE-SET,Lan,DIRECT
-#   - RULE-SET,Download,DIRECT
-#   - RULE-SET,Ad,🆎 AdBlock
-#   - RULE-SET,OpenAi,🤖 OpenAi
-#   - RULE-SET,BiliBili,📺 哔哩哔哩
-#   - RULE-SET,GlobalMedia,🎬 国际媒体
-#   - RULE-SET,Apple,🍎 苹果服务
-#   - RULE-SET,Github,🌏 全球加速
-#   - RULE-SET,Microsoft, 🌏 全球加速
-#   - RULE-SET,Google,🌌 谷歌服务
-#   - RULE-SET,Telegram,🌏 全球加速
-#   - RULE-SET,Twitter,🌏 全球加速
-#   - RULE-SET,Game,🎮 游戏平台
-#   - RULE-SET,ProxyLite,🌏 全球加速
-#   - RULE-SET,ChinaIP,DIRECT
-
-#   - GEOIP,CN,DIRECT
-#   - MATCH,🐟 兜底分流
-
 
  # 分流Policy 
 rules:
