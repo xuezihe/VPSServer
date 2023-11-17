@@ -1,0 +1,12 @@
+# 内容：自定义内容
+# 数量：6条
+payload:
+# utah
+  - DOMAIN-KEYWORD,utah
+  - DOMAIN-SUFFIX,utah.edu
+  # image
+  - DOMAIN-KEYWORD,imgur
+  - DOMAIN-SUFFIX,imgur.com
+  # Game 
+  - DOMAIN-SUFFIX,iflow.work
+  - DOMAIN-KEYWORD,steamdb
