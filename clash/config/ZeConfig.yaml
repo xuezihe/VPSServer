@@ -104,12 +104,14 @@ dns:
   nameserver:        # 默认 DNS 服务
     - 223.5.5.5
     - 119.29.29.29
-    - 114.114.114.114
-    - 119.28.28.28
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
     - 199.85.126.10
     - 199.85.127.10
+  nameserver-policy:
+    'www.baidu.com': '114.114.114.114'
+    '+.internal.crop.com': '10.0.0.1'
+    'geosite:cn': https://doh.pub/dns-query
   default-nameserver:
     - 114.114.114.114
     - 8.8.8.8
@@ -118,12 +120,18 @@ dns:
   fallback:          # 国外 DNS 服务器
     - https://cloudflare-dns.com/dns-query
     - https://dns.google/dns-query
-    - https://dns.alidns.com/dns-query
+    - tls://dns.google
   fallback-filter:
     geoip: true
     geoip-code: CN
+    geosite:
+      - gfw
     ipcidr:
       - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
 
 
 #========= 建立锚点 =========#
@@ -140,6 +148,8 @@ use:  &a2 {type: select,   use: [Subscribe,Subscribe2] }
 # proxy 相关 +🌏 全球加速 用在分proxy上
 h:    &a8 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others,ProxyGroup2, 🌏 全球加速, DIRECT] }
 
+#==========================================
+# @修改的部分
 proxy-providers:
   Subscribe:
     <<: *a1
@@ -182,6 +192,7 @@ tunnels:
     address: 127.0.0.1:7777 #这里不要改
     target: ip:port #这里写自建节点实际的ip和端口
     proxy: ProxyGroup2
+#==========================================
 
 proxy-groups:
 #分流分组
@@ -202,7 +213,7 @@ proxy-groups:
   - {name: 🇨🇳 台湾节点, <<: *a4, filter: "(?i)台|新北|彰化|TW|Taiwan"      }              # a4更改为a2，即为手动选择
   - {name: 🇺🇲 美国节点, <<: *a4, filter: "(?i)美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States"}             # a4更改为a2，即为手动选择
   - {name: 🇸🇬 坡县节点, <<: *a4, filter: "(?i)新加坡|坡|狮城|SG|Singapore"    }
-  - {name: ✈️ Others, <<: *a2, exclude-filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新|sg|singapore|美|us|unitedstates)).*" }
+  - {name: ✈️ Others, <<: *a2, exclude-filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新|sg|singapore|美|us|unitedstates|HK|JP|TW|US|SG)).*" }
 
 # 单独使用proxy2 ,加入tunnels处理
   - name: ProxyGroup2
