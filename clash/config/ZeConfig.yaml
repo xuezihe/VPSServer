@@ -222,7 +222,7 @@ proxy-groups:
     url: "https://www.gstatic.com/generate_204"
     filter: "(?i)🇭🇰|JP|HK|香港|日本"
     use:
-      - Subscribe1
+      - Subscribe
 # 单独使用proxy2 ,加入tunnels处理
   - name: ProxyGroup2
     type: url-test
