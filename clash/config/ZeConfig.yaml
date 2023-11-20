@@ -20,7 +20,7 @@ bind-address: "*"    # 地址绑定
 mode: rule           # 规则模式
 log-level: info      # 日志级别
 ipv6: true          # IPV6开关
-unified-delay: true
+unified-delay: false
 tcp-concurrent: true
 find-process-mode: strict
 external-controller: 127.0.0.1:9090
@@ -106,8 +106,6 @@ dns:
     - 119.29.29.29
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
-    - 199.85.126.10
-    - 199.85.127.10
   nameserver-policy:
     'www.baidu.com': '114.114.114.114'
     '+.internal.crop.com': '10.0.0.1'
@@ -121,6 +119,8 @@ dns:
     - https://cloudflare-dns.com/dns-query
     - https://dns.google/dns-query
     - tls://dns.google
+    - 199.85.126.10
+    - 199.85.127.10
   fallback-filter:
     geoip: true
     geoip-code: CN
@@ -138,7 +138,7 @@ dns:
 
 # 策略组引用
 # proxy 相关 只用在总Proxy上
-pr:   &a3 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, myss, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others, ProxyGroup2, DIRECT] }
+pr:   &a3 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, myss, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others, ProxyGroup2, ProxyGroup1, DIRECT] }
 #这里是订阅更新和延迟测试相关的
 p:    &a1 {type: http,     interval: 86400,  health-check: {enable: true, url: https://www.gstatic.com/generate_204, interval: 1800} }
 # 自动选择相关
@@ -146,7 +146,7 @@ auto: &a4 {type: url-test, lazy: true,  url: https://www.gstatic.com/generate_20
 # 手动选择相关
 use:  &a2 {type: select,   use: [Subscribe,Subscribe2] }
 # proxy 相关 +🌏 全球加速 用在分proxy上
-h:    &a8 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others,ProxyGroup2, 🌏 全球加速, DIRECT] }
+h:    &a8 {type: select,   proxies: [♻️ 自动选择, 🚀 手动切换, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇺🇲 美国节点, 🇨🇳 台湾节点, 🇸🇬 坡县节点, ✈️ Others,ProxyGroup2, ProxyGroup1, 🌏 全球加速, DIRECT] }
 
 #==========================================
 # @修改的部分
@@ -156,13 +156,13 @@ proxy-providers:
     url: https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
     path: ./proxy_providers/tmp.yaml
     # URL后面填写格式1: 直接填写你的机场Clash订阅[单一订阅][推荐此种方式，避免订阅泄露]
-    # URL后面填写格式2：https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
+    # URL后面填写格式2：https://convert.zephyrwork.work/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
   Subscribe2:
     <<: *a1
     url: https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false
     path: ./proxy_providers/tmp2.yaml
     # URL后面填写格式1: 直接填写你的机场Clash订阅[单一订阅][推荐此种方式，避免订阅泄露]
-    # URL后面填写格式2：https://sub.xeton.dev/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false    
+    # URL后面填写格式2：https://convert.zephyrwork.work/sub?target=clash&url=请手动填入你的订阅[多机场订阅用|分割即可]&list=true&udp=false    
 
 proxies:
   - name: "myss"
@@ -213,8 +213,16 @@ proxy-groups:
   - {name: 🇨🇳 台湾节点, <<: *a4, filter: "(?i)台|新北|彰化|TW|Taiwan"      }              # a4更改为a2，即为手动选择
   - {name: 🇺🇲 美国节点, <<: *a4, filter: "(?i)美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States"}             # a4更改为a2，即为手动选择
   - {name: 🇸🇬 坡县节点, <<: *a4, filter: "(?i)新加坡|坡|狮城|SG|Singapore"    }
-  - {name: ✈️ Others, <<: *a2, exclude-filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新|sg|singapore|美|us|unitedstates|HK|JP|TW|US|SG)).*" }
+  - {name: ✈️ Others, <<: *a2, exclude-filter: "(?i)^(?!.*(?:🇭🇰|🇯🇵|🇺🇸|🇸🇬|🇨🇳|港|hk|hongkong|台|tw|taiwan|日|jp|japan|新|sg|singapore|美|us|unitedstates|HK|JP|TW|US|SG|流量|套餐|到期|距离)).*" }
 
+# 单独使用proxy1 ,加入tunnels处理
+  - name: ProxyGroup1
+    type: url-test
+    disable-udp: false
+    url: "https://www.gstatic.com/generate_204"
+    filter: "(?i)🇭🇰|JP|HK|香港|日本"
+    use:
+      - Subscribe1
 # 单独使用proxy2 ,加入tunnels处理
   - name: ProxyGroup2
     type: url-test
@@ -223,12 +231,14 @@ proxy-groups:
     filter: "(?i)🇭🇰|JP|HK"
     use:
       - Subscribe2
+  
     
   # 测试Tunnels
   - name: 🤩 链式代理测试
     type: select
     proxies:
       - ProxyGroup2
+      - ProxyGroup1
       - myss
 #特殊分组
   # - { name: ✈️ 专线, <<: *a2, filter: "weiyi|iplc|hy2" }
