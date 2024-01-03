@@ -1,12 +1,12 @@
 # 内容：自定义内容
-# 数量：2条
+# 数量：8条
 
 
 # Game 
 DOMAIN-SUFFIX,iflow.work
 DOMAIN-KEYWORD,steamdb
 
-
+# ai 
 DOMAIN-KEYWORD,perplexity
 
 # WIFI Calling
