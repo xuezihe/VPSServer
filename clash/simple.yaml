@@ -62,16 +62,16 @@ proxy-providers:
   订阅一:
     <<: *p
     path: ./proxy_provider/subscribe1.yaml
-    url: "https://sub.locpg.gov.cn.tengxunjichang.top/api/v1/client/subscribe?token=c958cc26e87bd17493c52f2f5fb9e8af"
+    url: ""
 
   订阅二:
     <<: *p
     path: ./proxy_provider/subscribe2.yaml
-    url: "http://193.163.19.239:5603/b8673803-3fca-4046-9a46-b92a27ccf6c7/clash"
+    url: ""
 
   本地配置:
     <<: *p
-    path: ./proxy_providers/local.yaml
+    path: ./proxy_provider/local.yaml
 
 # 规则订阅
 rule-providers:
@@ -118,15 +118,23 @@ rule-providers:
   App-Activation:
     type: http
     behavior: classical
-    url: "https://github.com/LM-Firefly/Rules/raw/master/Special/App-Activation.list"
+    url: "https://raw.githubusercontent.com/LM-Firefly/Rules/master/Special/App-Activation.list"
     path: ./ruleset/App-Activation.yaml 
     interval: 86400
   Anti:
     type: http
     behavior: classical
-    url: "https://github.com/xuezihe/VPSServer/raw/main/clash/rules/Anti.yaml"
+    url: "https://raw.githubusercontent.com/xuezihe/VPSServer/main/clash/rules/Anti.yaml"
     path: ./ruleset/Anti.yaml
     interval: 86400
+  # gamedownload
+  GameDownload:
+    type: http
+    behavior: classical
+    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Game/GameDownload/GameDownload.yaml"
+    path: ./ruleset/GameDownload.yaml
+    interval: 86400
+    
 mode: rule
 # ipv6 支持
 ipv6: true
@@ -134,7 +142,7 @@ log-level: info
 # 允许局域网连接
 allow-lan: true
 # socks5/http 端口
-mixed-port: 7890
+mixed-port: 7891
 # Meta 内核特性 https://wiki.metacubex.one/config/general
 # 统一延迟
 # 更换延迟计算方式,去除握手等额外延迟
@@ -218,10 +226,8 @@ dns:
     - '*'
     - '+.lan'
     - '+.local'
-    - +.msftconnecttest.com
     - +.msftncsi.com
     - +.xboxlive.com
-    - msftconnecttest.com
     - xbox.*.microsoft.com    
   default-nameserver:
     - 223.5.5.5
@@ -397,6 +403,8 @@ rules:
   - GEOIP,netflix,NETFLIX
   - GEOIP,telegram,General
   - GEOIP,twitter,General
+
+  - RULE-SET,GameDownload,国内
   - RULE-SET,App-Activation,广告拦截
   - RULE-SET,Anti,广告拦截
   - GEOSITE,CN,国内
