@@ -244,7 +244,7 @@ dns:
     - https://doh.pub/dns-query
   nameserver-policy:
     "geosite:cn,private":
-      - https://doh.pub/dns-query
+      - 114.114.114.114
       - https://dns.alidns.com/dns-query
 
 # 多入站端口设置
@@ -380,9 +380,10 @@ rules:
   
 # custom
   - RULE-SET,OpenAi,OpenAI
-  - RULE-SET,CustomAll,General
-  - RULE-SET,LinkedIn,General
 
+
+  - GEOSITE,linkedin,General
+  - GEOSITE,discord,General
   - GEOSITE,apple,Apple
   - GEOSITE,apple-cn,Apple
   - GEOSITE,github,General
@@ -403,10 +404,14 @@ rules:
   - GEOIP,netflix,NETFLIX
   - GEOIP,telegram,General
   - GEOIP,twitter,General
+  - GEOIP,cloudflare,General
 
+  - RULE-SET,OpenAi,OpenAI
+  - RULE-SET,CustomAll,General
   - RULE-SET,GameDownload,国内
   - RULE-SET,App-Activation,广告拦截
   - RULE-SET,Anti,广告拦截
+
   - GEOSITE,CN,国内
   - GEOIP,CN,国内
   - MATCH,其他
